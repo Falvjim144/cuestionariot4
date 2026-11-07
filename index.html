@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#29457f">
+<title>¿Sabrías poner orden en tu móvil? · Sesión 4 · APFA Motril</title>
+<style>
+:root{--azul:#29457f;--azul2:#3d5b8d;--amarillo:#f1f79b;--blanco:#fff;--tinta:#1c3d67;--fondo:#f8fbff;--borde:#b4c5da}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--azul);font-family:Arial,Helvetica,sans-serif}button{font:inherit;cursor:pointer}button:focus-visible{outline:4px solid #f7bc4c;outline-offset:3px}button[disabled]{opacity:.55;cursor:default}
+#view{width:100%;height:100%;position:relative;overflow:hidden;background:#29457f}
+#canvas{width:960px;height:540px;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);transform-origin:center}
+.app{background:linear-gradient(120deg,#29457f,#1a376d);height:540px;width:960px;color:var(--blanco);position:relative;overflow:hidden}
+.app:before{position:absolute;content:"";inset:0;pointer-events:none;opacity:.10;background:radial-gradient(circle at 81% 15%,#9cbae7,transparent 40%)}
+header{height:94px;position:relative;padding:18px 25px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.kicker{font-size:11px;letter-spacing:.13em;font-weight:800;color:#d8e7ff;margin-bottom:7px}
+h1{font-size:27px;margin:0;line-height:1.09;color:var(--amarillo);letter-spacing:.01em}
+.subtitle{margin:6px 0 0;font-size:14px;color:#eaf1fb}.session{border:1px solid #a8bddb;background:#1c3b70;border-radius:10px;min-width:135px;text-align:center;padding:9px 12px;font-size:15px;line-height:1.4;font-weight:bold;color:var(--amarillo)}
+.progressrow{height:34px;padding:0 25px;display:flex;gap:14px;align-items:center;position:relative}.track{flex:1;height:10px;background:#1b325c;border-radius:12px;border:1px solid #7695c1;overflow:hidden}.bar{height:100%;width:0;background:var(--amarillo);transition:width .2s}.progress-label{font-size:14px;white-space:nowrap;font-weight:700}
+.stage{position:relative;margin:0 25px;display:grid;grid-template-columns:278px minmax(0,1fr);gap:13px;height:347px}
+.aside,.question-card{border-radius:13px;min-height:0;overflow:hidden}
+.aside{background:#183563;border:1px solid #8ca8ce;padding:16px;display:flex;flex-direction:column;gap:9px}
+.subject{font-size:20px;color:var(--amarillo);font-weight:800;line-height:1.13;display:flex;align-items:center;gap:8px}.subject .emoji{font-size:30px;line-height:1.2}
+.aside-desc{font-size:15px;line-height:1.36;margin:0;color:#ebf3ff}
+.hint-button{background:#375c92;color:white;border:1px solid #a7bfdc;border-radius:8px;font-size:14px;font-weight:700;padding:9px;align-self:flex-start}
+.hint{font-size:14px;line-height:1.35;color:#f3f8ff;background:#315184;border-left:4px solid var(--amarillo);padding:9px;border-radius:7px}
+.response{margin-top:auto;border:1px solid #aed3bd;background:#e7fbef;color:#174e34;padding:10px;border-radius:9px;font-size:14px;line-height:1.35;font-weight:600;max-height:157px;overflow:auto}
+.response.wrong{border-color:#ffcfa3;background:#fff2df;color:#805027}.response:empty{display:none}
+.question-card{background:var(--fondo);color:var(--tinta);border:1px solid var(--borde);display:flex;flex-direction:column}
+.card-head{height:38px;flex:0 0 38px;padding:10px 18px;background:#dce9f8;display:flex;justify-content:space-between;font-size:13px;font-weight:800;align-items:center;color:#23466e}
+.q-body{min-height:0;padding:9px 18px 9px;overflow-y:auto;scrollbar-color:#adc3df #edf3fa}
+.question{font-size:20px;line-height:1.21;margin:0 0 9px;font-weight:800;color:#1a3964}
+.answers{display:grid;grid-template-columns:1fr;gap:6px}
+.choice{display:flex;gap:10px;align-items:center;min-height:44px;padding:6px 12px;border:1.7px solid #97b3d5;border-radius:9px;background:#fff;color:#1d406e;font-size:14.6px;text-align:left;font-weight:700;line-height:1.20;width:100%}
+.choice-label{overflow-wrap:break-word}.choice:hover:not([disabled]){border-color:#335d99;background:#edf5ff}.choice .letter{background:#dceafb;color:#23456d;border-radius:7px;min-width:27px;padding:6px 3px;text-align:center;font-weight:800}.choice.ok{border-color:#4b9b73;background:#e9fff0}.choice.ok .letter{background:#b4efcf}.choice.no{border-color:#d59d78;background:#fff1e2}.choice.no .letter{background:#f8d7c1}.choice[disabled]{opacity:1}
+footer{position:relative;height:65px;padding:13px 25px;display:flex;align-items:center;gap:10px}.footnote{font-size:13px;line-height:1.3;color:#eaf1ff;flex:1}.btn{background:var(--amarillo);border:2px solid #fdfbd4;color:#203c65;border-radius:9px;font-weight:800;font-size:15px;padding:11px 16px;min-width:118px;min-height:43px}.btn.secondary{background:#3b5b8d;color:#fff;border-color:#acc4e4}.btn:not([disabled]):hover{filter:brightness(.95)}
+.overlay{position:absolute;inset:0;z-index:10;display:flex;justify-content:center;align-items:center;background:rgba(15,37,72,.95);padding:32px}.dialog{background:#f8fbff;color:#1c3d67;max-width:690px;width:100%;text-align:center;border:4px solid var(--amarillo);padding:28px 44px;border-radius:18px;box-shadow:0 13px 38px #10294a80}.bigicon{font-size:58px;line-height:1.15}.dialog h2{margin:10px 0;color:#29457f;font-size:33px;line-height:1.12}.dialog p{font-size:18px;line-height:1.38;margin:12px 0}.dialog .btn{margin-top:8px;font-size:19px;min-width:240px}.summary{background:#e8f1fc;color:#264b7b;font-size:19px;font-weight:bold;border-radius:10px;padding:15px;margin:16px auto}
+[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){.bar{transition:none}}
+</style>
+</head>
+<body>
+<div id="view"><div id="canvas"><main class="app" aria-label="Cuestionario de la sesión 4 del APFA de Motril">
+<header><div><div class="kicker">APFA MOTRIL · INFORMÁTICA E IA APLICADA</div><h1>¿SABRÍAS PONER ORDEN EN TU MÓVIL?</h1><p class="subtitle">Cuestionario final · 8 situaciones reales para decidir con criterio.</p></div><div class="session">TEMA 1 · SESIÓN 4<br><small>8 preguntas · nivel progresivo</small></div></header>
+<div class="progressrow"><div class="track" id="track" role="progressbar" aria-label="Preguntas completadas" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0"><div class="bar" id="bar"></div></div><span class="progress-label" id="progress-label">0 de 8 completadas</span></div>
+<section class="stage">
+<aside class="aside"><div class="subject"><span class="emoji" id="emoji"></span><span id="subject-title"></span></div><p class="aside-desc" id="aside-desc">Lee con calma. A veces hay varias respuestas que parecen razonables, pero solo una resuelve mejor el problema.</p><button type="button" class="hint-button" id="hint-btn" aria-expanded="false">💡 Mostrar pista</button><div class="hint" id="hint" hidden></div><div class="response" id="response" role="status" aria-live="polite"></div></aside>
+<div class="question-card"><div class="card-head"><span id="number"></span><span>Elige la mejor solución</span></div><div class="q-body"><h2 class="question" id="question"></h2><div class="answers" id="answers"></div></div></div>
+</section>
+<footer><div class="footnote" id="footnote">No es un examen: lo importante es aprender a decidir por ti mismo.</div><button type="button" class="btn secondary" id="previous">← Anterior</button><button type="button" class="btn" id="next" disabled>Siguiente →</button></footer>
+<div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title"><div class="dialog"><div class="bigicon">📱 🧠</div><h2 id="intro-title">¡Ponemos a prueba lo aprendido!</h2><p>Ya sabemos encontrar y organizar aplicaciones, gestionar avisos y localizar documentos. Ahora vamos a resolver <strong>8 situaciones reales de dificultad creciente</strong>.</p><p>Lee con atención, elige la solución más útil y recuerda que los menús pueden cambiar según el modelo de teléfono. Si te equivocas, puedes aprender y volver a intentarlo.</p><button type="button" class="btn" id="start">¡Comenzar el reto! →</button></div></div>
+<div class="overlay" id="finish" role="dialog" aria-modal="true" aria-labelledby="finish-title" hidden><div class="dialog"><div class="bigicon">🎓 🌟</div><h2 id="finish-title">¡RETO SUPERADO!</h2><p>Has resuelto situaciones reales para organizar tu teléfono y encontrar lo que necesitas.</p><div class="summary" id="summary"></div><p>Lo importante no es contestar deprisa, sino <strong>comprender qué ajuste necesitas y por qué</strong>.</p><button type="button" class="btn" id="restart">↻ Volver a practicar</button></div></div>
+</main></div></div>
+<script id="quizdata" type="application/json">
+[
+  {
+    "topic": "Una aplicación desaparece de Inicio",
+    "icon": "🔎",
+    "question": "No ves la Calculadora en Inicio. La buscas en el móvil, aparece y funciona. ¿Cómo la dejarías otra vez a mano?",
+    "options": [
+      "Buscar una versión nueva en la tienda de aplicaciones.",
+      "Añadir un acceso a Inicio desde la lista o biblioteca de aplicaciones.",
+      "Restablecer la disposición de toda la pantalla de inicio.",
+      "Vaciar los datos de la aplicación para recuperar el icono."
+    ],
+    "correct": 1,
+    "hint": "Si la aplicación se abre al buscarla, piensa qué parte del teléfono necesita cambiar y cuál no.",
+    "reason": "La aplicación sigue instalada; solo falta un acceso cómodo desde Inicio. Puedes volver a colocar su icono desde la lista o biblioteca de apps. El gesto exacto varía según el móvil.",
+    "wrong": [
+      "Instalar otra copia no es necesario: la Calculadora ya aparece y funciona.",
+      "",
+      "Restablecer toda la pantalla alteraría otros accesos y carpetas sin necesidad.",
+      "Borrar datos puede eliminar configuraciones y no es la forma de recuperar un acceso de Inicio."
+    ]
+  },
+  {
+    "topic": "Organizar accesos con criterio",
+    "icon": "🗂️",
+    "question": "Usas Cámara y Mapas en tus viajes y están en pantallas distintas. Quieres localizarlas juntas sin desinstalarlas. ¿Qué opción es más útil?",
+    "options": [
+      "Dejar sus iconos donde están y recordar en qué pantalla queda cada uno.",
+      "Quitar ambos iconos de Inicio y buscarlos cada vez que los necesites.",
+      "Agrupar sus accesos en una carpeta «Viajes» y colocarla en Inicio.",
+      "Colocarlas en una pantalla menos utilizada para dejar libre la principal."
+    ],
+    "correct": 2,
+    "hint": "La mejor organización facilita encontrar juntas dos herramientas que utilizas para una misma actividad.",
+    "reason": "Una carpeta «Viajes» en Inicio reúne ambos accesos y facilita encontrarlos sin quitar ni desinstalar las aplicaciones.",
+    "wrong": [
+      "Puede funcionar, pero no resuelve la necesidad de encontrarlas juntas y rápidamente.",
+      "Buscarlas cada vez añade pasos en lugar de hacerlas más accesibles.",
+      "",
+      "Una pantalla poco utilizada las aleja de la zona en la que quieres encontrarlas con facilidad."
+    ]
+  },
+  {
+    "topic": "Quitar no es desinstalar",
+    "icon": "📱",
+    "question": "Quieres despejar Inicio sin perder una aplicación. Su menú ofrece «Quitar de Inicio» y «Desinstalar». ¿Qué opción elegirías?",
+    "options": [
+      "«Quitar de Inicio», comprobando que sigue en la lista de aplicaciones.",
+      "«Desinstalar», porque así solo desaparece su icono de Inicio.",
+      "«Forzar detención», para que el acceso deje de ocupar espacio.",
+      "«Borrar almacenamiento», para ocultarla sin perder sus datos."
+    ],
+    "correct": 0,
+    "hint": "Una opción modifica el acceso de la pantalla principal; la otra afecta a la instalación del programa.",
+    "reason": "«Quitar de Inicio» elimina el acceso de esa pantalla, pero normalmente mantiene instalada la aplicación. «Desinstalar» sí la elimina del dispositivo.",
+    "wrong": [
+      "",
+      "Desinstalar elimina la aplicación del dispositivo; no solo su icono de Inicio.",
+      "Forzar su detención no organiza ni quita su acceso de la pantalla de inicio.",
+      "Borrar almacenamiento puede eliminar datos y configuraciones de la aplicación."
+    ]
+  },
+  {
+    "topic": "Una notificación descartada",
+    "icon": "💬",
+    "question": "Descartas sin querer un aviso de WhatsApp sobre un cambio de aula. El mensaje sigue en el chat. ¿Cómo lo consultarías?",
+    "options": [
+      "Reiniciando el teléfono para que vuelva a mostrarse el aviso.",
+      "Abriendo Ajustes y activando de nuevo el wifi de casa.",
+      "Buscando primero en la papelera de fotografías.",
+      "Abriendo WhatsApp y entrando en la conversación correspondiente."
+    ],
+    "correct": 3,
+    "hint": "Piensa en la diferencia entre el aviso en pantalla y el contenido que llegó a la aplicación.",
+    "reason": "Descartar una notificación no suele borrar el mensaje original. Como sigue en el chat, basta con abrir WhatsApp y consultar esa conversación.",
+    "wrong": [
+      "Reiniciar no es necesario y no garantiza recuperar una notificación descartada.",
+      "El mensaje ya está en WhatsApp: cambiar el wifi no es la vía directa para leerlo.",
+      "La papelera de fotos no guarda los mensajes de WhatsApp.",
+      ""
+    ]
+  },
+  {
+    "topic": "Avisos sin interrupciones",
+    "icon": "🔕",
+    "question": "Durante una conferencia recibes promociones sonoras de una tienda, pero quieres seguir oyendo llamadas. ¿Qué ajuste conviene?",
+    "options": [
+      "Bajar el volumen de los vídeos y mantener los avisos de la tienda.",
+      "Silenciar las notificaciones de esa tienda y conservar el timbre de llamadas.",
+      "Activar «No molestar» sin comprobar sus excepciones de llamadas.",
+      "Borrar los avisos actuales de la tienda sin cambiar sus permisos."
+    ],
+    "correct": 1,
+    "hint": "Conviene distinguir qué aplicación molesta de qué tipo de aviso necesitas conservar.",
+    "reason": "Al silenciar solo los avisos de la tienda, puedes reducir esas interrupciones sin cambiar el volumen de las llamadas. Los menús varían entre Android y iPhone.",
+    "wrong": [
+      "El volumen multimedia no suele controlar las notificaciones promocionales de la tienda.",
+      "",
+      "«No molestar» sin excepciones puede silenciar también llamadas que deseas oír.",
+      "Descartar las notificaciones que ya han llegado no evita que suenen avisos futuros."
+    ]
+  },
+  {
+    "topic": "Un aviso que pide dinero",
+    "icon": "🛡️",
+    "question": "Llega un SMS: «Paquete retenido. Paga 1,95 € aquí». No esperas ningún envío. ¿Cuál es la actuación más prudente?",
+    "options": [
+      "Abrir el enlace y comprobar si la página parece auténtica.",
+      "Responder al SMS pidiendo al remitente que confirme el pedido.",
+      "No abrir el enlace y verificar por canales oficiales si existe un envío.",
+      "Reenviar el enlace a un familiar para que pruebe si funciona."
+    ],
+    "correct": 2,
+    "hint": "Un mensaje inesperado que solicita un pago merece comprobación independiente, no desde el propio enlace.",
+    "reason": "No abras el enlace ni facilites datos. Si crees que puede existir un envío, compruébalo entrando por tu cuenta en la aplicación o web oficial de la empresa.",
+    "wrong": [
+      "Una página fraudulenta puede parecer auténtica; abrir el enlace no es la forma prudente de verificar.",
+      "Responder confirma que el número está activo y no demuestra la identidad del remitente.",
+      "",
+      "Reenviar un enlace sospechoso puede exponer también a otra persona."
+    ]
+  },
+  {
+    "topic": "¿Dónde quedó el documento?",
+    "icon": "📄",
+    "question": "Descargaste «Horario_APFA.pdf» y el navegador indicó «Descarga completada». No lo ves en Fotos. ¿Dónde buscarías primero?",
+    "options": [
+      "En las aplicaciones recientes, por si sigue abierto.",
+      "En el álbum de imágenes de la Galería.",
+      "En la lista de contactos de tu teléfono.",
+      "En Archivos o Mis archivos, revisando Descargas o buscando el nombre."
+    ],
+    "correct": 3,
+    "hint": "No todos los archivos se muestran en la Galería. Recuerda qué aplicación reúne documentos y descargas.",
+    "reason": "Los PDF descargados suelen localizarse desde Archivos o Mis archivos, en Descargas o en la ubicación de descarga configurada. También puede servir buscar «Horario_APFA».",
+    "wrong": [
+      "Las aplicaciones recientes no muestran necesariamente dónde quedó guardado un PDF.",
+      "La Galería o Fotos se centra en imágenes y vídeos; un PDF suele consultarse en Archivos.",
+      "Los contactos no son el lugar habitual donde se almacenan documentos.",
+      ""
+    ]
+  },
+  {
+    "topic": "GRAN RETO · Tres decisiones",
+    "icon": "🏆",
+    "question": "Recibes promociones molestas, esperas una llamada importante y no encuentras un PDF descargado. ¿Qué plan resuelve los tres problemas?",
+    "options": [
+      "Activar modo avión, borrar los avisos y buscar el PDF en Fotos.",
+      "Silenciar solo la tienda, mantener las llamadas y buscar el PDF en Archivos.",
+      "Bajar el volumen multimedia, guardar el aviso y volver a descargar el PDF.",
+      "Activar «No molestar» sin excepciones, cerrar apps y buscar en la Papelera."
+    ],
+    "correct": 1,
+    "hint": "Comprueba que cada propuesta solucione las tres necesidades sin provocar un problema nuevo.",
+    "reason": "Silenciar solo la tienda evita anuncios molestos; conservar el aviso de llamadas permite atenderla; buscar el PDF en Archivos o Descargas evita descargarlo de nuevo sin necesidad.",
+    "wrong": [
+      "El modo avión puede impedir llamadas normales, y Fotos no suele ser la ubicación del PDF.",
+      "",
+      "El volumen multimedia no controla necesariamente esas promociones, y descargar otra copia no ayuda a organizar la ya existente.",
+      "«No molestar» sin excepciones puede silenciar la llamada importante; la Papelera no es el primer lugar donde buscar un archivo descargado."
+    ]
+  }
+]
+</script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);const questions=JSON.parse($('quizdata').textContent);
+const responses=Array(questions.length).fill(null);const misses=Array(questions.length).fill(0);let current=0;
+function fit(){const v=$('view');const scale=Math.min(v.clientWidth/960,v.clientHeight/540);$('canvas').style.transform=`translate(-50%,-50%) scale(${Math.max(.01,scale)})`}
+window.addEventListener('resize',fit);fit();
+function finishedCount(){return responses.filter(v=>v!==null).length}
+function progress(){const n=finishedCount();$('bar').style.width=(n/questions.length*100)+'%';$('progress-label').textContent=n+' de '+questions.length+' completadas';$('track').setAttribute('aria-valuenow',String(n))}
+function show(n){current=n;const q=questions[n];$('number').textContent=`PREGUNTA ${n+1} DE ${questions.length}`;$('subject-title').textContent=q.topic;$('emoji').textContent=q.icon;$('question').textContent=q.question;$('hint').textContent=q.hint;$('hint').hidden=true;$('hint-btn').textContent='💡 Mostrar pista';$('hint-btn').setAttribute('aria-expanded','false');$('response').textContent='';$('response').className='response';$('aside-desc').hidden=false;$('answers').replaceChildren();q.options.forEach((label,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='choice';btn.innerHTML=`<span class="letter">${'ABCD'[i]}</span><span class="choice-label"></span>`;btn.querySelector('.choice-label').textContent=label;btn.addEventListener('click',()=>select(i));$('answers').appendChild(btn)});if(responses[n]!==null){$('aside-desc').hidden=true;const btns=$('answers').querySelectorAll('button');btns.forEach(b=>b.disabled=true);btns[q.correct].classList.add('ok');$('response').textContent='✓ '+q.reason;$('footnote').textContent='Pregunta resuelta. Puedes repasar tu respuesta o continuar.'}else{$('footnote').textContent='Lee todas las opciones antes de responder. Puedes pedir una pista.'}$('previous').disabled=n===0;$('next').disabled=responses[n]===null;$('next').textContent=n===questions.length-1?'Ver resultado →':'Siguiente →';progress()}
+function select(i){if(responses[current]!==null)return;const q=questions[current];$('aside-desc').hidden=true;const btns=Array.from($('answers').querySelectorAll('button'));btns.forEach(b=>b.classList.remove('no'));if(i===q.correct){responses[current]=i;btns.forEach(b=>b.disabled=true);btns[i].classList.add('ok');$('response').className='response';$('response').textContent='✓ '+q.reason;$('footnote').textContent='¡Bien razonado! Ahora puedes continuar.';$('next').disabled=false;progress()}else{misses[current]++;btns[i].classList.add('no');$('response').className='response wrong';$('response').textContent=q.wrong[i]+' Piensa de nuevo y prueba otra opción.';$('footnote').textContent='Vuelve a intentarlo. Puedes abrir la pista de la izquierda.'}}
+function end(){const first=misses.filter((n,i)=>responses[i]!==null&&n===0).length;$('summary').textContent=`${finishedCount()} de ${questions.length} situaciones resueltas · ${first} a la primera`;$('finish').hidden=false;$('restart').focus()}
+$('hint-btn').addEventListener('click',()=>{const show=$('hint').hidden;$('hint').hidden=!show;$('hint-btn').textContent=show?'💡 Ocultar pista':'💡 Mostrar pista';$('hint-btn').setAttribute('aria-expanded',String(show))});
+$('previous').addEventListener('click',()=>{if(current>0)show(current-1)});
+$('next').addEventListener('click',()=>{if(responses[current]===null)return;if(current===questions.length-1)end();else show(current+1)});
+$('start').addEventListener('click',()=>{$('intro').hidden=true;show(0);$('answers').querySelector('button').focus()});
+$('restart').addEventListener('click',()=>{responses.fill(null);misses.fill(0);$('finish').hidden=true;show(0);$('answers').querySelector('button').focus()});show(0);
+})();
+</script>
+</body></html>
